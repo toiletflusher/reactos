@@ -65,12 +65,15 @@ CreateTrayIcon(LPTSTR szLCID)
 
             SetBkColor(hdc, GetSysColor(COLOR_HIGHLIGHT));
             SetTextColor(hdc, GetSysColor(COLOR_HIGHLIGHTTEXT));
+            
+            // reuse code from reactos input.dll
+			LOGFONTW lf;
 
+			SystemParametersInfoW(SPI_GETICONTITLELOGFONT, sizeof(lf), &lf, 0);
+            
             ExtTextOut(hdc, rect.left, rect.top, ETO_OPAQUE, &rect, _T(""), 0, NULL);
-
-            hFont = CreateFont(-11, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, ANSI_CHARSET,
-                               OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                               DEFAULT_QUALITY, FF_DONTCARE, _T("Tahoma"));
+            
+			hFont = CreateFontIndirectW(&lf);
 
             hFontOld = SelectObject(hdc, hFont);
             DrawText(hdc, _tcsupr(szBuf), 2, &rect, DT_SINGLELINE|DT_CENTER|DT_VCENTER);
@@ -82,12 +85,15 @@ CreateTrayIcon(LPTSTR szLCID)
             IconInfo.hbmColor = hBitmap;
             IconInfo.hbmMask = hBmpNew;
             IconInfo.fIcon = TRUE;
-
+            
+            // reuse code from reactos input.dll again
+            
             hIcon = CreateIconIndirect(&IconInfo);
 
             DeleteObject(hBmpNew);
             DeleteObject(hBmpOld);
             DeleteObject(hFont);
+            DeleteObject(&lf);
         }
     }
 
